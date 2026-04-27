@@ -1,0 +1,66 @@
+# macOS / system files
+.DS_Store
+._*
+Thumbs.db
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE / editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and temporary outputs
+*.log
+logs/
+tmp/
+temp/
+outputs/
+output/
+runs/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Large model / checkpoint artifacts
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.gguf
+checkpoints/
+weights/
+models/
+
+# Local data caches
+cache/
+.cache/
+data/
+datasets/
