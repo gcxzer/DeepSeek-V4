@@ -1,0 +1,9 @@
+{ // 文本生成相关配置对象
+  "_from_model_config": true, // 表示这份生成配置来自模型配置或由模型配置派生
+  "bos_token_id": 0, // 生成时使用的 beginning-of-sentence token ID
+  "eos_token_id": 1, // 生成时遇到该 end-of-sentence token ID 可停止生成
+  "do_sample": true, // 生成时启用采样，而不是总是选择概率最高的 token
+  "temperature": 1.0, // 采样温度；1.0 表示不额外放大或压低概率分布
+  "top_p": 1.0, // nucleus sampling 阈值；1.0 表示不按累计概率截断候选 token
+  "transformers_version": "4.46.3" // 生成或保存该配置时使用的 Transformers 版本
+} // 文本生成配置对象结束

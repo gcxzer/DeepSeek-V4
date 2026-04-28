@@ -1,0 +1,34 @@
+{ // tokenizer 的整体配置对象
+  "add_bos_token": false, // 编码文本时不自动在开头添加 BOS(begin of sentence) token
+  "add_eos_token": false, // 编码文本时不自动在结尾添加 EOS(end of sentence) token
+  "bos_token": { // BOS token 的详细定义
+    "__type": "AddedToken", // 表示这是 tokenizer 额外注册的特殊 token
+    "content": "<｜begin▁of▁sentence｜>", // BOS token 的实际字符串内容
+    "lstrip": false, // 匹配该 token 时不吞掉左侧空白
+    "normalized": true, // 该 token 会参与 tokenizer 的规范化流程
+    "rstrip": false, // 匹配该 token 时不吞掉右侧空白
+    "single_word": false // 该 token 不要求只作为独立单词匹配
+  }, // BOS token 定义结束
+  "clean_up_tokenization_spaces": false, // 解码时不自动清理 tokenization 产生的多余空格
+  "eos_token": { // EOS token 的详细定义
+    "__type": "AddedToken", // 表示这是 tokenizer 额外注册的特殊 token
+    "content": "<｜end▁of▁sentence｜>", // EOS token 的实际字符串内容
+    "lstrip": false, // 匹配该 token 时不吞掉左侧空白
+    "normalized": true, // 该 token 会参与 tokenizer 的规范化流程
+    "rstrip": false, // 匹配该 token 时不吞掉右侧空白
+    "single_word": false // 该 token 不要求只作为独立单词匹配
+  }, // EOS token 定义结束
+  "legacy": true, // 使用兼容旧版 tokenizer 行为的模式
+  "model_max_length": 1048576, // tokenizer 认为模型可接受的最大 token 长度
+  "pad_token": { // padding token 的详细定义
+    "__type": "AddedToken", // 表示这是 tokenizer 额外注册的特殊 token
+    "content": "<｜end▁of▁sentence｜>", // padding token 复用 EOS token 的字符串内容
+    "lstrip": false, // 匹配该 token 时不吞掉左侧空白
+    "normalized": true, // 该 token 会参与 tokenizer 的规范化流程
+    "rstrip": false, // 匹配该 token 时不吞掉右侧空白
+    "single_word": false // 该 token 不要求只作为独立单词匹配
+  }, // padding token 定义结束
+  "sp_model_kwargs": {}, // 传给 SentencePiece 模型的额外参数；这里为空
+  "unk_token": null, // 未定义 unknown token，未知字符/片段不使用单独的 UNK token 配置
+  "tokenizer_class": "PreTrainedTokenizerFast" // 指定使用 Transformers 的快速 tokenizer 基类加载
+} // tokenizer 配置对象结束
