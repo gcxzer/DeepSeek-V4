@@ -19,6 +19,10 @@ venv/
 env/
 ENV/
 
+# uv local cache / temp state
+.uv-cache/
+uv-cache/
+
 # Build and packaging artifacts
 build/
 dist/
