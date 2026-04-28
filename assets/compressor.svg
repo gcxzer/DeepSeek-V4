@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="2450" viewBox="0 0 2200 2450">
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ea580c"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 800 50px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 27px Arial, sans-serif; fill: #334155; }
+      .section { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .step { font: 800 25px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 500 22px Arial, sans-serif; fill: #334155; }
+      .body-small { font: 500 19px Arial, sans-serif; fill: #334155; }
+      .mono { font: 700 22px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-small { font: 700 19px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-tiny { font: 700 17px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2.5; rx: 18; }
+      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 3; rx: 14; }
+      .box-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 3; rx: 14; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 3; rx: 14; }
+      .box-gray { fill: #f1f5f9; stroke: #64748b; stroke-width: 3; rx: 14; }
+      .box-pink { fill: #fdf2f8; stroke: #db2777; stroke-width: 3; rx: 14; }
+      .box-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 3; rx: 14; }
+      .arrow-blue { stroke: #2563eb; stroke-width: 4; fill: none; marker-end: url(#arrow-blue); }
+      .arrow-green { stroke: #16a34a; stroke-width: 4; fill: none; marker-end: url(#arrow-green); }
+      .arrow-orange { stroke: #ea580c; stroke-width: 4; fill: none; marker-end: url(#arrow-orange); }
+      .dash { stroke-dasharray: 11 9; }
+      .divider { stroke: #cbd5e1; stroke-width: 2; }
+      .note { font: 700 21px Arial, sans-serif; fill: #7c2d12; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2200" height="2450"/>
+
+  <text x="70" y="78" class="title">Compressor.forward(): concrete shape example</text>
+  <text x="70" y="122" class="subtitle">Example numbers: B=2, S=10, D=16, compress_ratio=4, head_dim=8, rope_head_dim=2, overlap=True, coff=2</text>
+
+  <rect x="55" y="165" width="2090" height="255" class="panel"/>
+  <text x="90" y="215" class="section">Concrete setup used in this diagram</text>
+  <text x="95" y="262" class="mono">input x = [2, 10, 16]</text>
+  <text x="560" y="262" class="mono">R = 4</text>
+  <text x="760" y="262" class="mono">H = 8</text>
+  <text x="960" y="262" class="mono">RD = 2</text>
+  <text x="1180" y="262" class="mono">coff = 2</text>
+  <text x="1450" y="262" class="mono">coff * H = 16</text>
+  <text x="95" y="310" class="body">Because R=4, overlap mode is on. `wkv` and `wgate` first output 16 channels, then pooling returns 8 channels.</text>
+  <text x="95" y="358" class="body">For S=10 and R=4: 8 tokens are compressed now into 2 KV entries; 2 remainder tokens are kept in state.</text>
+
+  <rect x="55" y="465" width="2090" height="485" class="panel"/>
+  <text x="90" y="515" class="section">0. Shared first steps: make candidate KV and gate scores</text>
+
+  <rect x="95" y="610" width="320" height="115" class="box-gray"/>
+  <text x="125" y="650" class="step">input x</text>
+  <text x="125" y="686" class="mono-small">[2, 10, 16]</text>
+  <text x="125" y="714" class="body-small">hidden states of tokens</text>
+
+  <rect x="525" y="545" width="380" height="140" class="box"/>
+  <text x="555" y="586" class="step">kv = wkv(x)</text>
+  <text x="555" y="622" class="mono-small">Linear(16, 16)</text>
+  <text x="555" y="656" class="mono-small">[2, 10, 16]</text>
+  <text x="555" y="681" class="body-small">candidate KV values</text>
+
+  <rect x="525" y="755" width="380" height="140" class="box-green"/>
+  <text x="555" y="796" class="step">score = wgate(x)</text>
+  <text x="555" y="832" class="mono-small">Linear(16, 16)</text>
+  <text x="555" y="866" class="mono-small">[2, 10, 16]</text>
+  <text x="555" y="891" class="body-small">learned importance scores</text>
+
+  <rect x="1040" y="625" width="430" height="150" class="box-amber"/>
+  <text x="1070" y="666" class="step">ape parameter</text>
+  <text x="1070" y="703" class="mono-small">[4, 16]</text>
+  <text x="1070" y="737" class="body-small">position bias inside each R-token group</text>
+  <text x="1070" y="762" class="body-small">added to scores before softmax</text>
+
+  <rect x="1590" y="625" width="430" height="150" class="box-orange"/>
+  <text x="1620" y="666" class="step">choose path</text>
+  <text x="1620" y="703" class="mono-small">start_pos == 0: prefill</text>
+  <text x="1620" y="737" class="mono-small">start_pos  > 0: decode</text>
+  <text x="1620" y="762" class="body-small">same compression idea, different timing</text>
+
+  <path d="M415 665 C455 665, 480 615, 520 615" class="arrow-blue"/>
+  <path d="M415 665 C455 665, 480 825, 520 825" class="arrow-green"/>
+  <path d="M905 615 C960 615, 990 660, 1035 685" class="arrow-blue"/>
+  <path d="M905 825 C960 825, 990 742, 1035 720" class="arrow-green"/>
+  <path d="M1470 700 C1515 700, 1540 700, 1585 700" class="arrow-orange"/>
+
+  <rect x="55" y="1000" width="2090" height="805" class="panel"/>
+  <text x="90" y="1050" class="section">1. Prefill path: start_pos == 0, process the prompt in batches</text>
+
+  <rect x="95" y="1135" width="410" height="170" class="box-gray"/>
+  <text x="125" y="1176" class="step">1.1 decide full groups</text>
+  <text x="125" y="1212" class="mono-small">remainder = 10 % 4 = 2</text>
+  <text x="125" y="1244" class="mono-small">cutoff = 10 - 2 = 8</text>
+  <text x="125" y="1276" class="body-small">only complete R-token groups are compressed now</text>
+
+  <rect x="625" y="1135" width="430" height="170" class="box-pink"/>
+  <text x="655" y="1176" class="step">1.2 save leftovers</text>
+  <text x="655" y="1212" class="mono-small">kv_state / score_state</text>
+  <text x="655" y="1244" class="mono-small">store 2 tokens</text>
+  <text x="655" y="1276" class="body-small">decode can finish this group later</text>
+
+  <rect x="1175" y="1135" width="420" height="170" class="box"/>
+  <text x="1205" y="1176" class="step">1.3 group kv</text>
+  <text x="1205" y="1212" class="mono-small">kv.unflatten(1, [-1, 4])</text>
+  <text x="1205" y="1244" class="mono-small">[2, 2, 4, 16]</text>
+  <text x="1205" y="1276" class="body-small">each group contains R consecutive tokens</text>
+
+  <rect x="1695" y="1135" width="390" height="170" class="box-green"/>
+  <text x="1725" y="1176" class="step">1.4 group score + ape</text>
+  <text x="1725" y="1212" class="mono-small">score.unflatten + ape</text>
+  <text x="1725" y="1244" class="mono-small">[2, 2, 4, 16]</text>
+  <text x="1725" y="1276" class="body-small">score knows position inside group</text>
+
+  <path d="M505 1220 C550 1220, 575 1220, 620 1220" class="arrow-orange"/>
+  <path d="M1055 1220 C1100 1220, 1125 1220, 1170 1220" class="arrow-blue"/>
+  <path d="M1595 1220 C1635 1220, 1655 1220, 1690 1220" class="arrow-green"/>
+
+  <rect x="95" y="1405" width="500" height="185" class="box-orange"/>
+  <text x="125" y="1446" class="step">1.5 optional overlap transform</text>
+  <text x="125" y="1482" class="mono-small">only because R == 4</text>
+  <text x="125" y="1514" class="mono-small">[2, 2, 4, 16]</text>
+  <text x="125" y="1546" class="mono-small">-> [2, 2, 8, 8]</text>
+  <text x="125" y="1574" class="body-small">mix previous window + current window for smoother boundaries</text>
+
+  <rect x="745" y="1405" width="500" height="185" class="box-amber"/>
+  <text x="775" y="1446" class="step">1.6 softmax over token axis</text>
+  <text x="775" y="1482" class="mono-small">weight = softmax(score, dim=2)</text>
+  <text x="775" y="1514" class="body-small">for each output channel, learn which token</text>
+  <text x="775" y="1542" class="body-small">inside the group should matter most</text>
+  <text x="775" y="1574" class="mono-small">shape unchanged before sum</text>
+
+  <rect x="1395" y="1405" width="500" height="185" class="box"/>
+  <text x="1425" y="1446" class="step">1.7 weighted sum</text>
+  <text x="1425" y="1482" class="mono-small">kv = (kv * weight).sum(dim=2)</text>
+  <text x="1425" y="1514" class="mono-small">[2, 2, 8]</text>
+  <text x="1425" y="1546" class="body-small">R tokens become 1 compressed KV vector</text>
+
+  <path d="M1885 1305 C1885 1365, 345 1345, 345 1400" class="arrow-orange"/>
+  <path d="M595 1498 C645 1498, 690 1498, 740 1498" class="arrow-orange"/>
+  <path d="M1245 1498 C1295 1498, 1340 1498, 1390 1498" class="arrow-blue"/>
+
+  <rect x="385" y="1660" width="670" height="95" class="box-gray"/>
+  <text x="415" y="1698" class="step">Result after prefill pooling</text>
+  <text x="415" y="1733" class="mono-small">kv: [2, floor(10 / 4), 8] = [2, 2, 8]</text>
+
+  <path d="M1645 1590 C1645 1660, 1140 1695, 1060 1695" class="arrow-blue"/>
+
+  <rect x="55" y="1855" width="2090" height="345" class="panel"/>
+  <text x="90" y="1905" class="section">2. Decode path: start_pos > 0, collect tokens until one compressed vector is ready</text>
+
+  <rect x="95" y="1985" width="395" height="130" class="box-gray"/>
+  <text x="125" y="2026" class="step">2.1 one new token</text>
+  <text x="125" y="2062" class="mono-small">x: [2, 1, 16]</text>
+  <text x="125" y="2094" class="mono-small">kv/score: [2, 1, 16]</text>
+
+  <rect x="600" y="1985" width="430" height="130" class="box-pink"/>
+  <text x="630" y="2026" class="step">2.2 store into state</text>
+  <text x="630" y="2062" class="mono-small">index = start_pos % 4</text>
+  <text x="630" y="2094" class="body-small">state holds tokens of the current group</text>
+
+  <rect x="1140" y="1985" width="430" height="130" class="box-orange"/>
+  <text x="1170" y="2026" class="step">2.3 enough tokens?</text>
+  <text x="1170" y="2062" class="mono-small">(start_pos + 1) % 4 == 0</text>
+  <text x="1170" y="2094" class="body-small">if false: return without writing cache</text>
+
+  <rect x="1680" y="1985" width="405" height="130" class="box"/>
+  <text x="1710" y="2026" class="step">2.4 compress one group</text>
+  <text x="1710" y="2062" class="mono-small">softmax(score_state)</text>
+  <text x="1710" y="2094" class="mono-small">sum -> [2, 1, 8]</text>
+
+  <path d="M490 2050 C530 2050, 555 2050, 595 2050" class="arrow-blue"/>
+  <path d="M1030 2050 C1070 2050, 1095 2050, 1135 2050" class="arrow-orange"/>
+  <path d="M1570 2050 C1610 2050, 1635 2050, 1675 2050" class="arrow-blue"/>
+
+  <rect x="55" y="2245" width="2090" height="150" class="panel"/>
+  <text x="90" y="2295" class="section">3. Final steps after a compressed KV exists</text>
+
+  <rect x="95" y="2340" width="300" height="90" class="box"/>
+  <text x="125" y="2377" class="step">RMSNorm</text>
+  <text x="125" y="2410" class="mono-small">[2, N, 8]</text>
+
+  <rect x="500" y="2340" width="390" height="90" class="box"/>
+  <text x="530" y="2377" class="step">apply RoPE</text>
+  <text x="530" y="2410" class="mono-small">only last 2 dims</text>
+
+  <rect x="995" y="2340" width="390" height="90" class="box-green"/>
+  <text x="1025" y="2377" class="step">quantize / rotate</text>
+  <text x="1025" y="2410" class="mono-small">prepare cache storage</text>
+
+  <rect x="1490" y="2325" width="590" height="105" class="box-amber"/>
+  <text x="1520" y="2363" class="step">write kv_cache</text>
+  <text x="1520" y="2396" class="mono-tiny">prefill: kv_cache[:, :2] = kv</text>
+  <text x="1520" y="2421" class="mono-tiny">decode:  kv_cache[:, start_pos//4] = kv.squeeze(1)</text>
+
+  <path d="M395 2385 C435 2385, 460 2385, 495 2385" class="arrow-blue"/>
+  <path d="M890 2385 C930 2385, 955 2385, 990 2385" class="arrow-blue"/>
+  <path d="M1385 2385 C1425 2385, 1450 2385, 1485 2385" class="arrow-green"/>
+
+  <text x="95" y="1790" class="note">Example: if R=4 and S=10, prefill compresses 8 tokens into 2 cache entries; the last 2 tokens are kept in state for later decode.</text>
+</svg>

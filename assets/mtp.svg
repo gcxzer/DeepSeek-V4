@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1650" viewBox="0 0 2200 1650">
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ea580c"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 800 50px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 27px Arial, sans-serif; fill: #334155; }
+      .section { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .step { font: 800 25px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 500 22px Arial, sans-serif; fill: #334155; }
+      .body-small { font: 500 19px Arial, sans-serif; fill: #334155; }
+      .mono { font: 700 22px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-small { font: 700 19px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-tiny { font: 700 16px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2.5; rx: 18; }
+      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 3; rx: 14; }
+      .box-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 3; rx: 14; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 3; rx: 14; }
+      .box-gray { fill: #f1f5f9; stroke: #64748b; stroke-width: 3; rx: 14; }
+      .box-pink { fill: #fdf2f8; stroke: #db2777; stroke-width: 3; rx: 14; }
+      .box-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 3; rx: 14; }
+      .lane { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2.5; rx: 16; }
+      .arrow-blue { stroke: #2563eb; stroke-width: 4; fill: none; marker-end: url(#arrow-blue); }
+      .arrow-green { stroke: #16a34a; stroke-width: 4; fill: none; marker-end: url(#arrow-green); }
+      .arrow-orange { stroke: #ea580c; stroke-width: 4; fill: none; marker-end: url(#arrow-orange); }
+      .dash { stroke-dasharray: 11 9; }
+      .note { font: 700 21px Arial, sans-serif; fill: #7c2d12; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2200" height="1650"/>
+  <text x="70" y="78" class="title">MTPBlock.forward(): concrete shape example</text>
+  <text x="70" y="122" class="subtitle">Example numbers: B=2, S=8, HC=4, D=16, vocab_size=1000, world_size=2</text>
+
+  <rect x="55" y="165" width="2090" height="210" class="panel"/>
+  <text x="90" y="215" class="section">What MTPBlock receives and reuses</text>
+  <text x="95" y="265" class="mono">hidden x = [2, 8, 4, 16]</text>
+  <text x="585" y="265" class="mono">input_ids = [2, 8]</text>
+  <text x="970" y="265" class="mono">embed(input_ids) = [2, 8, 16]</text>
+  <text x="1510" y="265" class="mono">logits = [2, 1000]</text>
+  <text x="95" y="318" class="body">`MTPBlock` shares the main model's embedding table and output head. It adds one extra Block-like step before producing logits.</text>
+
+  <rect x="55" y="430" width="2090" height="440" class="panel"/>
+  <text x="90" y="480" class="section">1. Fuse token embedding with incoming HC hidden state</text>
+
+  <rect x="95" y="565" width="330" height="125" class="box-gray"/>
+  <text x="125" y="606" class="step">1.1 incoming hidden</text>
+  <text x="125" y="642" class="mono-small">x: [2, 8, 4, 16]</text>
+  <text x="125" y="674" class="body-small">already has HC branches</text>
+
+  <rect x="95" y="725" width="330" height="105" class="box-gray"/>
+  <text x="125" y="766" class="step">1.2 input ids</text>
+  <text x="125" y="802" class="mono-small">[2, 8]</text>
+
+  <rect x="535" y="705" width="365" height="125" class="box-green"/>
+  <text x="565" y="746" class="step">1.3 shared embed</text>
+  <text x="565" y="782" class="mono-small">e = embed(input_ids)</text>
+  <text x="565" y="814" class="mono-small">[2, 8, 16]</text>
+
+  <rect x="1010" y="525" width="410" height="145" class="box"/>
+  <text x="1040" y="566" class="step">1.4 normalize hidden</text>
+  <text x="1040" y="602" class="mono-small">x = hnorm(x)</text>
+  <text x="1040" y="634" class="mono-small">h_proj(x)</text>
+  <text x="1040" y="662" class="mono-small">[2, 8, 4, 16]</text>
+
+  <rect x="1010" y="720" width="410" height="145" class="box-green"/>
+  <text x="1040" y="761" class="step">1.5 normalize embedding</text>
+  <text x="1040" y="797" class="mono-small">e = enorm(e)</text>
+  <text x="1040" y="829" class="mono-small">e_proj(e).unsqueeze(2)</text>
+  <text x="1040" y="857" class="mono-small">[2, 8, 1, 16]</text>
+
+  <rect x="1545" y="625" width="465" height="145" class="box-orange"/>
+  <text x="1575" y="666" class="step">1.6 add with broadcasting</text>
+  <text x="1575" y="702" class="mono-small">e_proj(e).unsqueeze(2) + h_proj(x)</text>
+  <text x="1575" y="734" class="mono-small">[2,8,1,16] + [2,8,4,16]</text>
+  <text x="1575" y="762" class="mono-small">= [2, 8, 4, 16]</text>
+
+  <path d="M425 628 C655 535, 785 595, 1005 595" class="arrow-blue"/>
+  <path d="M425 778 C465 778, 490 768, 530 768" class="arrow-green"/>
+  <path d="M900 768 C945 768, 965 792, 1005 792" class="arrow-green"/>
+  <path d="M1420 598 C1470 598, 1500 665, 1540 685" class="arrow-blue"/>
+  <path d="M1420 792 C1470 792, 1500 730, 1540 718" class="arrow-green"/>
+
+  <rect x="55" y="925" width="2090" height="500" class="panel"/>
+  <text x="90" y="975" class="section">2. Run one normal Block step, then produce logits with ParallelHead</text>
+
+  <rect x="95" y="1060" width="420" height="125" class="box"/>
+  <text x="125" y="1101" class="step">2.1 Block input</text>
+  <text x="125" y="1137" class="mono-small">[2, 8, 4, 16]</text>
+  <text x="125" y="1169" class="body-small">same shape as regular HC Block input</text>
+
+  <rect x="625" y="1015" width="440" height="160" class="box-amber"/>
+  <text x="655" y="1056" class="step">2.2 attention sublayer</text>
+  <text x="655" y="1092" class="mono-small">hc_pre: [2,8,4,16] -> [2,8,16]</text>
+  <text x="655" y="1124" class="mono-small">Attention: [2,8,16]</text>
+  <text x="655" y="1156" class="mono-small">hc_post: -> [2,8,4,16]</text>
+
+  <rect x="1175" y="1015" width="440" height="160" class="box-green"/>
+  <text x="1205" y="1056" class="step">2.3 MoE/FFN sublayer</text>
+  <text x="1205" y="1092" class="mono-small">hc_pre: [2,8,4,16] -> [2,8,16]</text>
+  <text x="1205" y="1124" class="mono-small">MoE: [2,8,16]</text>
+  <text x="1205" y="1156" class="mono-small">hc_post: -> [2,8,4,16]</text>
+
+  <rect x="1725" y="1015" width="360" height="160" class="box-orange"/>
+  <text x="1755" y="1056" class="step">2.4 shared head</text>
+  <text x="1755" y="1092" class="mono-small">ParallelHead</text>
+  <text x="1755" y="1124" class="mono-small">[2,8,4,16] -> [2,8,16]</text>
+  <text x="1755" y="1156" class="mono-small">logits: [2,1000]</text>
+
+  <path d="M515 1122 C555 1122, 580 1095, 620 1095" class="arrow-blue"/>
+  <path d="M1065 1095 C1110 1095, 1130 1095, 1170 1095" class="arrow-green"/>
+  <path d="M1615 1095 C1660 1095, 1680 1095, 1720 1095" class="arrow-orange"/>
+
+  <rect x="95" y="1260" width="730" height="115" class="box-pink"/>
+  <text x="125" y="1298" class="step">Why `input_ids` is passed into MTPBlock</text>
+  <text x="125" y="1325" class="body-small">It needs current token embeddings for the fusion step.</text>
+  <text x="125" y="1352" class="body-small">MoE gate may also use token ids in hash-routing layers.</text>
+
+  <rect x="945" y="1260" width="770" height="115" class="box-amber"/>
+  <text x="975" y="1298" class="step">Why `embed` and `head` are assigned from Transformer</text>
+  <text x="975" y="1325" class="body-small">MTP reuses the same vocabulary embedding and lm head</text>
+  <text x="975" y="1352" class="body-small">instead of creating separate token tables.</text>
+
+  <rect x="55" y="1480" width="2090" height="125" class="panel"/>
+  <text x="90" y="1530" class="section">Short memory</text>
+  <text x="360" y="1532" class="mono-small">MTP = fuse current embedding + previous HC hidden -> one extra Block -> shared ParallelHead logits</text>
+  <text x="95" y="1578" class="note">In this code path, `ParallelHead.get_logits` still uses only the last sequence position: output shape is `[batch, vocab_size]`.</text>
+</svg>

@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1650" viewBox="0 0 2200 1650">
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ea580c"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 800 50px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 27px Arial, sans-serif; fill: #334155; }
+      .section { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .step { font: 800 25px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 500 22px Arial, sans-serif; fill: #334155; }
+      .body-small { font: 500 19px Arial, sans-serif; fill: #334155; }
+      .mono { font: 700 22px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-small { font: 700 19px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-tiny { font: 700 16px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2.5; rx: 18; }
+      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 3; rx: 14; }
+      .box-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 3; rx: 14; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 3; rx: 14; }
+      .box-gray { fill: #f1f5f9; stroke: #64748b; stroke-width: 3; rx: 14; }
+      .box-pink { fill: #fdf2f8; stroke: #db2777; stroke-width: 3; rx: 14; }
+      .box-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 3; rx: 14; }
+      .lane-blue { fill: #eff6ff; stroke: #93c5fd; stroke-width: 2.5; rx: 16; }
+      .lane-green { fill: #f0fdf4; stroke: #86efac; stroke-width: 2.5; rx: 16; }
+      .arrow-blue { stroke: #2563eb; stroke-width: 4; fill: none; marker-end: url(#arrow-blue); }
+      .arrow-green { stroke: #16a34a; stroke-width: 4; fill: none; marker-end: url(#arrow-green); }
+      .arrow-orange { stroke: #ea580c; stroke-width: 4; fill: none; marker-end: url(#arrow-orange); }
+      .dash { stroke-dasharray: 11 9; }
+      .note { font: 700 21px Arial, sans-serif; fill: #7c2d12; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2200" height="1650"/>
+  <text x="70" y="78" class="title">MoE.forward(): concrete routing example</text>
+  <text x="70" y="122" class="subtitle">Example numbers: B=2, S=3, D=16, routed_experts=8, topk=2, world_size=2, moe_inter_dim=32</text>
+
+  <rect x="55" y="165" width="2090" height="210" class="panel"/>
+  <text x="90" y="215" class="section">Concrete setup used in this diagram</text>
+  <text x="95" y="265" class="mono">input x = [2, 3, 16]</text>
+  <text x="480" y="265" class="mono">flatten = [6, 16]</text>
+  <text x="860" y="265" class="mono">gate scores = [6, 8]</text>
+  <text x="1275" y="265" class="mono">indices = [6, 2]</text>
+  <text x="1605" y="265" class="mono">output = [2, 3, 16]</text>
+  <text x="95" y="318" class="body">Rank 0 owns experts 0-3, rank 1 owns experts 4-7. Each token chooses 2 routed experts, then every token also passes through 1 shared expert.</text>
+
+  <rect x="55" y="430" width="2090" height="440" class="panel"/>
+  <text x="90" y="480" class="section">1. Gate: score all experts and choose top-2 per token</text>
+
+  <rect x="95" y="565" width="330" height="125" class="box-gray"/>
+  <text x="125" y="606" class="step">1.1 input</text>
+  <text x="125" y="642" class="mono-small">x: [2, 3, 16]</text>
+  <text x="125" y="674" class="body-small">6 tokens total</text>
+
+  <rect x="535" y="565" width="345" height="125" class="box"/>
+  <text x="565" y="606" class="step">1.2 flatten</text>
+  <text x="565" y="642" class="mono-small">x.view(-1, 16)</text>
+  <text x="565" y="674" class="mono-small">[6, 16]</text>
+
+  <rect x="990" y="565" width="390" height="125" class="box-green"/>
+  <text x="1020" y="606" class="step">1.3 gate scores</text>
+  <text x="1020" y="642" class="mono-small">linear([6,16], [8,16])</text>
+  <text x="1020" y="674" class="mono-small">scores: [6, 8]</text>
+
+  <rect x="1490" y="525" width="520" height="205" class="box-orange"/>
+  <text x="1520" y="566" class="step">1.4 top-2 routing</text>
+  <text x="1520" y="602" class="mono-small">indices: [6, 2]</text>
+  <text x="1520" y="634" class="mono-small">weights: [6, 2]</text>
+  <text x="1520" y="666" class="body-small">example token routes:</text>
+  <text x="1520" y="695" class="mono-tiny">t0->[6,2], t1->[1,7], t2->[3,4]</text>
+  <text x="1520" y="720" class="mono-tiny">t3->[2,5], t4->[0,6], t5->[7,1]</text>
+
+  <path d="M425 628 C465 628, 490 628, 530 628" class="arrow-blue"/>
+  <path d="M880 628 C920 628, 945 628, 985 628" class="arrow-green"/>
+  <path d="M1380 628 C1420 628, 1445 628, 1485 628" class="arrow-orange"/>
+
+  <rect x="95" y="760" width="910" height="88" class="box-amber"/>
+  <text x="125" y="797" class="mono-small">If score_func is not softmax, selected weights are normalized</text>
+  <text x="125" y="827" class="mono-small">so each token's top-2 weights sum to 1, then multiplied by route_scale.</text>
+
+  <rect x="55" y="925" width="2090" height="505" class="panel"/>
+  <text x="90" y="975" class="section">2. Routed experts are sharded across TP ranks</text>
+
+  <rect x="95" y="1040" width="880" height="275" class="lane-blue"/>
+  <text x="125" y="1082" class="step">Rank 0 computes experts 0, 1, 2, 3</text>
+  <rect x="125" y="1115" width="190" height="95" class="box"/>
+  <text x="150" y="1152" class="mono-small">expert 0</text>
+  <text x="150" y="1182" class="mono-small">token 4</text>
+  <rect x="340" y="1115" width="190" height="95" class="box"/>
+  <text x="365" y="1152" class="mono-small">expert 1</text>
+  <text x="365" y="1182" class="mono-small">token 1,5</text>
+  <rect x="555" y="1115" width="190" height="95" class="box"/>
+  <text x="580" y="1152" class="mono-small">expert 2</text>
+  <text x="580" y="1182" class="mono-small">token 0,3</text>
+  <rect x="770" y="1115" width="175" height="95" class="box"/>
+  <text x="795" y="1152" class="mono-small">expert 3</text>
+  <text x="795" y="1182" class="mono-small">token 2</text>
+  <text x="125" y="1262" class="mono-small">Each selected token runs SwiGLU FFN:</text>
+  <text x="125" y="1294" class="mono-small">w1/w3: [16 -> 32], silu(w1) * w3, w2: [32 -> 16]</text>
+
+  <rect x="1225" y="1040" width="880" height="275" class="lane-green"/>
+  <text x="1255" y="1082" class="step">Rank 1 computes experts 4, 5, 6, 7</text>
+  <rect x="1255" y="1115" width="190" height="95" class="box-green"/>
+  <text x="1280" y="1152" class="mono-small">expert 4</text>
+  <text x="1280" y="1182" class="mono-small">token 2</text>
+  <rect x="1470" y="1115" width="190" height="95" class="box-green"/>
+  <text x="1495" y="1152" class="mono-small">expert 5</text>
+  <text x="1495" y="1182" class="mono-small">token 3</text>
+  <rect x="1685" y="1115" width="190" height="95" class="box-green"/>
+  <text x="1710" y="1152" class="mono-small">expert 6</text>
+  <text x="1710" y="1182" class="mono-small">token 0,4</text>
+  <rect x="1900" y="1115" width="175" height="95" class="box-green"/>
+  <text x="1925" y="1152" class="mono-small">expert 7</text>
+  <text x="1925" y="1182" class="mono-small">token 1,5</text>
+  <text x="1255" y="1262" class="mono-small">Each expert output is multiplied by its route weight,</text>
+  <text x="1255" y="1294" class="mono-small">then accumulated into local y: [6, 16]</text>
+
+  <path d="M1750 730 C1750 880, 520 900, 520 1035" class="arrow-blue dash"/>
+  <path d="M1750 730 C1750 880, 1660 900, 1660 1035" class="arrow-green dash"/>
+
+  <rect x="55" y="1480" width="2090" height="125" class="panel"/>
+  <text x="90" y="1530" class="section">3. Merge + shared expert</text>
+  <rect x="640" y="1505" width="285" height="80" class="box-orange"/>
+  <text x="670" y="1537" class="step">all_reduce sum</text>
+  <text x="670" y="1568" class="mono-small">routed y: [6,16]</text>
+  <rect x="1040" y="1505" width="330" height="80" class="box-pink"/>
+  <text x="1070" y="1537" class="step">+ shared expert</text>
+  <text x="1070" y="1568" class="mono-small">also [6,16]</text>
+  <rect x="1490" y="1505" width="355" height="80" class="box-amber"/>
+  <text x="1520" y="1537" class="step">view original shape</text>
+  <text x="1520" y="1568" class="mono-small">[6,16] -> [2,3,16]</text>
+  <path d="M925 1545 C965 1545, 995 1545, 1035 1545" class="arrow-orange"/>
+  <path d="M1370 1545 C1415 1545, 1440 1545, 1485 1545" class="arrow-green"/>
+
+  <text x="95" y="1400" class="note">Key idea: routed experts are sparse and sharded, but the shared expert always runs for every token.</text>
+</svg>

@@ -323,7 +323,7 @@ class Compressor(nn.Module):
         kv = self.wkv(x)
         score = self.wgate(x)
         if start_pos == 0:
-            should_compress = seqlen >= ratio
+            should_compress = seqlen >= ratio 
             remainder = seqlen % ratio
             cutoff = seqlen - remainder
             offset = ratio if overlap else 0

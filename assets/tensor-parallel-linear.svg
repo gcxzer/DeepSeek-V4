@@ -35,39 +35,39 @@
   </defs>
 
   <rect class="bg" width="1800" height="1280"/>
-  <text x="70" y="70" class="title">Tensor Parallel Linear Shapes</text>
-  <text x="70" y="112" class="subtitle">PyTorch Linear weight shape is [out_features, in_features]; linear(x, weight) computes x @ weight.T</text>
+  <text x="70" y="70" class="title">Tensor Parallel Linear Shapes: concrete example</text>
+  <text x="70" y="112" class="subtitle">Example numbers: seq_len=4, in_features=8, out_features=12, world_size=2</text>
 
   <rect x="55" y="155" width="1690" height="495" class="panel"/>
   <text x="85" y="205" class="panel-title">ColumnParallelLinear: split output dimension</text>
-  <text x="85" y="240" class="small">world_size = 2, every rank receives the same x and owns different output rows of weight</text>
+  <text x="85" y="240" class="small">Column split: every rank receives the same x=[4,8], but owns 6 output rows of the weight</text>
 
   <rect x="90" y="310" width="245" height="100" class="matrix-gray"/>
   <text x="122" y="353" class="label">input</text>
-  <text x="122" y="385" class="mono">x: [seq_len,</text>
-  <text x="122" y="413" class="mono">in_features]</text>
+  <text x="122" y="385" class="mono">x: [4, 8]</text>
+  <text x="122" y="406" class="mono-small">4 tokens, 8 dims</text>
 
   <rect x="410" y="270" width="450" height="295" class="lane-blue"/>
   <text x="435" y="310" class="label">Rank 0</text>
   <rect x="455" y="335" width="360" height="112" class="weight"/>
   <text x="482" y="374" class="mono-small">weight_0:</text>
-  <text x="482" y="404" class="mono-small">[out_features / world_size,</text>
-  <text x="482" y="432" class="mono-small"> in_features]</text>
+  <text x="482" y="404" class="mono-small">[12 / 2, 8]</text>
+  <text x="482" y="432" class="mono-small">= [6, 8]</text>
   <text x="455" y="482" class="mono-small">y_0 = linear(x, weight_0)</text>
   <text x="455" y="513" class="mono-small">    = x @ weight_0.T</text>
   <rect x="510" y="520" width="270" height="58" class="matrix-blue"/>
-  <text x="535" y="556" class="mono-small">[seq_len, out/world]</text>
+  <text x="535" y="556" class="mono-small">[4, 6]</text>
 
   <rect x="900" y="270" width="450" height="295" class="lane-blue"/>
   <text x="925" y="310" class="label">Rank 1</text>
   <rect x="945" y="335" width="360" height="112" class="weight"/>
   <text x="972" y="374" class="mono-small">weight_1:</text>
-  <text x="972" y="404" class="mono-small">[out_features / world_size,</text>
-  <text x="972" y="432" class="mono-small"> in_features]</text>
+  <text x="972" y="404" class="mono-small">[12 / 2, 8]</text>
+  <text x="972" y="432" class="mono-small">= [6, 8]</text>
   <text x="945" y="482" class="mono-small">y_1 = linear(x, weight_1)</text>
   <text x="945" y="513" class="mono-small">    = x @ weight_1.T</text>
   <rect x="1000" y="520" width="270" height="58" class="matrix-blue"/>
-  <text x="1025" y="556" class="mono-small">[seq_len, out/world]</text>
+  <text x="1025" y="556" class="mono-small">[4, 6]</text>
 
   <path d="M335 360 C365 360, 375 380, 405 380" class="arrow-blue"/>
   <path d="M335 360 C705 235, 835 380, 895 380" class="arrow-blue"/>
@@ -76,43 +76,43 @@
   <rect x="1430" y="340" width="230" height="130" class="matrix-blue"/>
   <text x="1460" y="382" class="label">logical full y</text>
   <text x="1460" y="415" class="mono-small">concat(y_0, y_1)</text>
-  <text x="1460" y="445" class="mono-small">[seq_len, out]</text>
+  <text x="1460" y="445" class="mono-small">[4, 12]</text>
   <path d="M1270 548 C1360 548, 1375 420, 1425 410" class="arrow-blue dash"/>
   <text x="1435" y="520" class="note">no all_reduce</text>
 
   <rect x="55" y="705" width="1690" height="505" class="panel"/>
   <text x="85" y="755" class="panel-title">RowParallelLinear: split input dimension</text>
-  <text x="85" y="790" class="small">each rank receives one input shard, computes a partial full-width output, then all_reduce sums them</text>
+  <text x="85" y="790" class="small">Row split: split x=[4,8] into two x shards [4,4]; each rank computes a partial [4,12], then all_reduce sums them</text>
 
   <rect x="90" y="850" width="295" height="82" class="matrix-gray"/>
-  <text x="118" y="884" class="mono-small">x_0: [seq_len,</text>
-  <text x="118" y="914" class="mono-small">in_features / world_size]</text>
+  <text x="118" y="884" class="mono-small">x_0: [4, 4]</text>
+  <text x="118" y="914" class="mono-small">first half of input</text>
   <rect x="90" y="1012" width="295" height="82" class="matrix-gray"/>
-  <text x="118" y="1046" class="mono-small">x_1: [seq_len,</text>
-  <text x="118" y="1076" class="mono-small">in_features / world_size]</text>
+  <text x="118" y="1046" class="mono-small">x_1: [4, 4]</text>
+  <text x="118" y="1076" class="mono-small">second half of input</text>
 
   <rect x="460" y="815" width="430" height="180" class="lane-green"/>
   <text x="485" y="855" class="label">Rank 0</text>
   <rect x="500" y="875" width="350" height="90" class="weight"/>
   <text x="525" y="906" class="mono-small">weight_0:</text>
-  <text x="525" y="934" class="mono-small">[out_features,</text>
-  <text x="525" y="959" class="mono-small"> in_features / world_size]</text>
+  <text x="525" y="934" class="mono-small">[12, 8 / 2]</text>
+  <text x="525" y="959" class="mono-small">= [12, 4]</text>
   <text x="500" y="985" class="mono-small">partial_0 = x_0 @ weight_0.T</text>
 
   <rect x="460" y="1000" width="430" height="180" class="lane-green"/>
   <text x="485" y="1040" class="label">Rank 1</text>
   <rect x="500" y="1060" width="350" height="90" class="weight"/>
   <text x="525" y="1091" class="mono-small">weight_1:</text>
-  <text x="525" y="1119" class="mono-small">[out_features,</text>
-  <text x="525" y="1144" class="mono-small"> in_features / world_size]</text>
+  <text x="525" y="1119" class="mono-small">[12, 8 / 2]</text>
+  <text x="525" y="1144" class="mono-small">= [12, 4]</text>
   <text x="500" y="1170" class="mono-small">partial_1 = x_1 @ weight_1.T</text>
 
   <rect x="990" y="855" width="270" height="76" class="matrix-green"/>
   <text x="1018" y="887" class="mono-small">partial_0:</text>
-  <text x="1018" y="916" class="mono-small">[seq_len, out]</text>
+  <text x="1018" y="916" class="mono-small">[4, 12]</text>
   <rect x="990" y="1045" width="270" height="76" class="matrix-green"/>
   <text x="1018" y="1077" class="mono-small">partial_1:</text>
-  <text x="1018" y="1106" class="mono-small">[seq_len, out]</text>
+  <text x="1018" y="1106" class="mono-small">[4, 12]</text>
 
   <rect x="1355" y="944" width="230" height="110" class="sum"/>
   <text x="1392" y="990" class="label">all_reduce</text>
@@ -120,7 +120,7 @@
 
   <rect x="1625" y="955" width="85" height="88" class="matrix-green"/>
   <text x="1655" y="990" class="mono-small">y</text>
-  <text x="1535" y="1078" class="mono-small">[seq_len, out_features]</text>
+  <text x="1535" y="1078" class="mono-small">[4, 12]</text>
   <text x="1342" y="1104" class="note">bias added after all_reduce</text>
 
   <path d="M385 891 C420 891, 420 925, 455 925" class="arrow-green"/>

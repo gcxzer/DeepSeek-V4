@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1550" viewBox="0 0 2200 1550">
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ea580c"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 800 50px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 27px Arial, sans-serif; fill: #334155; }
+      .section { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .step { font: 800 25px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 500 22px Arial, sans-serif; fill: #334155; }
+      .body-small { font: 500 19px Arial, sans-serif; fill: #334155; }
+      .mono { font: 700 22px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-small { font: 700 19px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-tiny { font: 700 16px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2.5; rx: 18; }
+      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 3; rx: 14; }
+      .box-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 3; rx: 14; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 3; rx: 14; }
+      .box-gray { fill: #f1f5f9; stroke: #64748b; stroke-width: 3; rx: 14; }
+      .box-pink { fill: #fdf2f8; stroke: #db2777; stroke-width: 3; rx: 14; }
+      .box-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 3; rx: 14; }
+      .arrow-blue { stroke: #2563eb; stroke-width: 4; fill: none; marker-end: url(#arrow-blue); }
+      .arrow-green { stroke: #16a34a; stroke-width: 4; fill: none; marker-end: url(#arrow-green); }
+      .arrow-orange { stroke: #ea580c; stroke-width: 4; fill: none; marker-end: url(#arrow-orange); }
+      .dash { stroke-dasharray: 11 9; }
+      .note { font: 700 21px Arial, sans-serif; fill: #7c2d12; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2200" height="1550"/>
+
+  <text x="70" y="78" class="title">ParallelHead.forward(): concrete shape example</text>
+  <text x="70" y="122" class="subtitle">Example numbers: B=2, S=8, HC=4, D=16, vocab_size=1000, world_size=2</text>
+
+  <rect x="55" y="165" width="2090" height="210" class="panel"/>
+  <text x="90" y="215" class="section">Concrete setup used in this diagram</text>
+  <text x="95" y="265" class="mono">input x = [2, 8, 4, 16]</text>
+  <text x="560" y="265" class="mono">flattened = [2, 8, 64]</text>
+  <text x="1060" y="265" class="mono">weight_i = [500, 16]</text>
+  <text x="1515" y="265" class="mono">final logits = [2, 1000]</text>
+  <text x="95" y="318" class="body">Each TP rank owns 500 vocab rows. Local logits are `[2,500]`; `all_gather` concatenates rank 0 and rank 1 into `[2,1000]`.</text>
+
+  <rect x="55" y="430" width="2090" height="655" class="panel"/>
+  <text x="90" y="480" class="section">1. hc_head(): learn how much each HC branch contributes</text>
+
+  <rect x="95" y="575" width="330" height="125" class="box-gray"/>
+  <text x="125" y="616" class="step">1.1 input x</text>
+  <text x="125" y="652" class="mono-small">x: [2, 8, 4, 16]</text>
+  <text x="125" y="684" class="body-small">one D-vector per branch</text>
+
+  <rect x="535" y="575" width="365" height="125" class="box"/>
+  <text x="565" y="616" class="step">1.2 flatten branches</text>
+  <text x="565" y="652" class="mono-small">x.flatten(2).float()</text>
+  <text x="565" y="684" class="mono-small">[2, 8, 64]</text>
+
+  <rect x="1010" y="500" width="390" height="185" class="box-amber"/>
+  <text x="1040" y="541" class="step">1.3 normalize scale</text>
+  <text x="1040" y="577" class="mono-small">rsqrt = 1 / sqrt(</text>
+  <text x="1040" y="609" class="mono-small">  mean(x^2) + eps)</text>
+  <text x="1040" y="641" class="mono-small">rsqrt: [2, 8, 1]</text>
+  <text x="1040" y="667" class="body-small">keeps gate logits stable</text>
+
+  <rect x="1010" y="735" width="390" height="145" class="box-green"/>
+  <text x="1040" y="776" class="step">1.4 linear mix scores</text>
+  <text x="1040" y="812" class="mono-small">hc_fn: [4, 64]</text>
+  <text x="1040" y="844" class="mono-small">mixes = mixes * rsqrt</text>
+  <text x="1040" y="872" class="mono-small">mixes: [2, 8, 4]</text>
+
+  <rect x="1525" y="575" width="450" height="145" class="box-orange"/>
+  <text x="1555" y="616" class="step">1.5 sigmoid gates</text>
+  <text x="1555" y="652" class="mono-small">pre = sigmoid(mixes * hc_scale</text>
+  <text x="1555" y="684" class="mono-small">              + hc_base) + hc_eps</text>
+  <text x="1555" y="716" class="mono-small">pre: [2, 8, 4]</text>
+
+  <rect x="665" y="925" width="510" height="125" class="box-pink"/>
+  <text x="695" y="966" class="step">1.6 restore original branch view</text>
+  <text x="695" y="1002" class="mono-small">x.view(shape): [2, 8, 4, 16]</text>
+  <text x="695" y="1034" class="body-small">shape saved before flatten</text>
+
+  <rect x="1310" y="925" width="545" height="125" class="box"/>
+  <text x="1340" y="966" class="step">1.7 weighted sum over HC</text>
+  <text x="1340" y="1002" class="mono-small">y = sum(pre.unsqueeze(-1) * x, dim=2)</text>
+  <text x="1340" y="1034" class="mono-small">[2, 8, 4, 16] -> [2, 8, 16]</text>
+
+  <path d="M425 638 C465 638, 490 638, 530 638" class="arrow-blue"/>
+  <path d="M900 638 C945 638, 970 575, 1005 575" class="arrow-blue"/>
+  <path d="M900 638 C945 638, 970 805, 1005 805" class="arrow-green"/>
+  <path d="M1400 805 C1460 805, 1495 675, 1520 655" class="arrow-green"/>
+  <path d="M1400 575 C1460 575, 1495 625, 1520 635" class="arrow-orange dash"/>
+  <path d="M1975 648 C2040 648, 2040 988, 1860 988" class="arrow-orange"/>
+  <path d="M900 700 C900 800, 920 875, 920 920" class="arrow-blue dash"/>
+  <path d="M1175 988 C1225 988, 1255 988, 1305 988" class="arrow-blue"/>
+
+  <rect x="55" y="1135" width="2090" height="350" class="panel"/>
+  <text x="90" y="1185" class="section">2. forward(): normalize, take last token, compute vocab-parallel logits</text>
+
+  <rect x="95" y="1260" width="330" height="125" class="box"/>
+  <text x="125" y="1301" class="step">2.1 RMSNorm</text>
+  <text x="125" y="1337" class="mono-small">norm(y)</text>
+  <text x="125" y="1369" class="mono-small">[2, 8, 16]</text>
+
+  <rect x="535" y="1260" width="365" height="125" class="box-gray"/>
+  <text x="565" y="1301" class="step">2.2 last token only</text>
+  <text x="565" y="1337" class="mono-small">x[:, -1].float()</text>
+  <text x="565" y="1369" class="mono-small">[2, 16]</text>
+
+  <rect x="1010" y="1260" width="440" height="125" class="box-green"/>
+  <text x="1040" y="1301" class="step">2.3 local logits</text>
+  <text x="1040" y="1337" class="mono-small">F.linear([2,16], [500,16])</text>
+  <text x="1040" y="1369" class="mono-small">[2, 500]</text>
+
+  <rect x="1560" y="1260" width="475" height="125" class="box-amber"/>
+  <text x="1590" y="1301" class="step">2.4 gather vocab shards</text>
+  <text x="1590" y="1337" class="mono-small">all_gather -> cat(dim=-1)</text>
+  <text x="1590" y="1369" class="mono-small">final logits: [2, 1000]</text>
+
+  <path d="M425 1322 C465 1322, 490 1322, 530 1322" class="arrow-blue"/>
+  <path d="M900 1322 C945 1322, 965 1322, 1005 1322" class="arrow-green"/>
+  <path d="M1450 1322 C1495 1322, 1515 1322, 1555 1322" class="arrow-orange"/>
+
+  <text x="95" y="1452" class="note">Important: this head predicts only the next token, because `get_logits` uses `x[:, -1]` instead of all sequence positions.</text>
+</svg>

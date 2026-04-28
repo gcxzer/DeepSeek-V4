@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1800" viewBox="0 0 2200 1800">
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ea580c"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 800 50px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 27px Arial, sans-serif; fill: #334155; }
+      .section { font: 800 34px Arial, sans-serif; fill: #0f172a; }
+      .step { font: 800 25px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 500 22px Arial, sans-serif; fill: #334155; }
+      .body-small { font: 500 19px Arial, sans-serif; fill: #334155; }
+      .mono { font: 700 22px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-small { font: 700 19px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .mono-tiny { font: 700 16px "SFMono-Regular", Menlo, Consolas, monospace; fill: #0f172a; }
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2.5; rx: 18; }
+      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 3; rx: 14; }
+      .box-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 3; rx: 14; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 3; rx: 14; }
+      .box-gray { fill: #f1f5f9; stroke: #64748b; stroke-width: 3; rx: 14; }
+      .box-pink { fill: #fdf2f8; stroke: #db2777; stroke-width: 3; rx: 14; }
+      .box-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 3; rx: 14; }
+      .arrow-blue { stroke: #2563eb; stroke-width: 4; fill: none; marker-end: url(#arrow-blue); }
+      .arrow-green { stroke: #16a34a; stroke-width: 4; fill: none; marker-end: url(#arrow-green); }
+      .arrow-orange { stroke: #ea580c; stroke-width: 4; fill: none; marker-end: url(#arrow-orange); }
+      .dash { stroke-dasharray: 11 9; }
+      .note { font: 700 21px Arial, sans-serif; fill: #7c2d12; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2200" height="1800"/>
+
+  <text x="70" y="78" class="title">Indexer.forward(): choose compressed KV blocks for sparse attention</text>
+  <text x="70" y="122" class="subtitle">Example numbers: B=2, S=10, D=16, q_rank=12, index_heads=4, world_size=2, local_heads=2, head_dim=8, ratio=4</text>
+
+  <rect x="55" y="165" width="2090" height="210" class="panel"/>
+  <text x="90" y="215" class="section">What Indexer returns</text>
+  <text x="95" y="265" class="body">For each token position, it scores compressed KV cache entries and returns the best compressed positions.</text>
+  <text x="95" y="318" class="mono">compressed kv_cache: [2, 2, 8]</text>
+  <text x="595" y="318" class="mono">index_score: [2, 10, 2]</text>
+  <text x="1035" y="318" class="mono">topk_idxs: [2, 10, 2]</text>
+  <text x="1465" y="304" class="body">`offset` shifts compressed positions into</text>
+  <text x="1465" y="334" class="body">the combined sparse-attention KV table.</text>
+
+  <rect x="55" y="430" width="2090" height="480" class="panel"/>
+  <text x="90" y="480" class="section">1. Build index query q from qr</text>
+
+  <rect x="95" y="570" width="360" height="130" class="box-gray"/>
+  <text x="125" y="611" class="step">1.1 input qr</text>
+  <text x="125" y="647" class="mono-small">qr: [2, 10, 12]</text>
+  <text x="125" y="679" class="body-small">low-rank query from Attention</text>
+
+  <rect x="565" y="570" width="390" height="130" class="box"/>
+  <text x="595" y="611" class="step">1.2 wq_b(qr)</text>
+  <text x="595" y="647" class="mono-small">ColumnParallelLinear</text>
+  <text x="595" y="679" class="mono-small">[2, 10, 16]</text>
+
+  <rect x="1065" y="570" width="390" height="130" class="box"/>
+  <text x="1095" y="611" class="step">1.3 split heads</text>
+  <text x="1095" y="647" class="mono-small">unflatten -> [2, 10, 2, 8]</text>
+  <text x="1095" y="679" class="body-small">2 local index heads on this rank</text>
+
+  <rect x="1565" y="570" width="420" height="130" class="box-orange"/>
+  <text x="1595" y="611" class="step">1.4 RoPE + rotate + fp4</text>
+  <text x="1595" y="647" class="mono-small">RoPE on last 2 dims</text>
+  <text x="1595" y="679" class="body-small">quantized query for index scoring</text>
+
+  <path d="M455 635 C495 635, 520 635, 560 635" class="arrow-blue"/>
+  <path d="M955 635 C995 635, 1020 635, 1060 635" class="arrow-blue"/>
+  <path d="M1455 635 C1495 635, 1520 635, 1560 635" class="arrow-orange"/>
+
+  <rect x="55" y="960" width="2090" height="460" class="panel"/>
+  <text x="90" y="1010" class="section">2. Build compressed KV candidates and per-head weights</text>
+
+  <rect x="95" y="1095" width="365" height="130" class="box-gray"/>
+  <text x="125" y="1136" class="step">2.1 input x</text>
+  <text x="125" y="1172" class="mono-small">x: [2, 10, 16]</text>
+  <text x="125" y="1204" class="body-small">same hidden states</text>
+
+  <rect x="570" y="1060" width="420" height="165" class="box-pink"/>
+  <text x="600" y="1101" class="step">2.2 compressor(x)</text>
+  <text x="600" y="1137" class="mono-small">ratio=4, rotate=True</text>
+  <text x="600" y="1169" class="mono-small">10 tokens -> 2 compressed KV</text>
+  <text x="600" y="1201" class="mono-small">kv_cache: [2, 2, 8]</text>
+
+  <rect x="570" y="1270" width="420" height="115" class="box-green"/>
+  <text x="600" y="1311" class="step">2.3 weights_proj(x)</text>
+  <text x="600" y="1347" class="mono-small">[2, 10, 2]</text>
+  <text x="600" y="1375" class="body-small">learned weight per local head</text>
+
+  <rect x="1145" y="1130" width="450" height="150" class="box-amber"/>
+  <text x="1175" y="1171" class="step">2.4 scale weights</text>
+  <text x="1175" y="1207" class="mono-small">weights *= head_dim^-0.5</text>
+  <text x="1175" y="1239" class="mono-small">weights *= index_heads^-0.5</text>
+  <text x="1175" y="1267" class="mono-small">shape stays [2, 10, 2]</text>
+
+  <path d="M460 1160 C500 1160, 525 1143, 565 1143" class="arrow-orange"/>
+  <path d="M460 1160 C505 1160, 525 1328, 565 1328" class="arrow-green"/>
+  <path d="M990 1328 C1060 1328, 1085 1220, 1140 1210" class="arrow-green"/>
+
+  <rect x="55" y="1470" width="2090" height="260" class="panel"/>
+  <text x="90" y="1520" class="section">3. Score compressed KV entries, mask future blocks, return top-k indices</text>
+
+  <rect x="95" y="1565" width="445" height="120" class="box"/>
+  <text x="125" y="1605" class="step">3.1 dot product</text>
+  <text x="125" y="1638" class="mono-tiny">einsum(q [2,10,2,8], kv [2,2,8])</text>
+  <text x="125" y="1660" class="mono-tiny">-> [2,10,2,2]</text>
+
+  <rect x="610" y="1565" width="405" height="120" class="box-green"/>
+  <text x="640" y="1605" class="step">3.2 head-weighted sum</text>
+  <text x="640" y="1638" class="mono-tiny">relu * weights</text>
+  <text x="640" y="1660" class="mono-tiny">sum heads -> [2,10,2]</text>
+
+  <rect x="1085" y="1565" width="355" height="120" class="box-orange"/>
+  <text x="1115" y="1605" class="step">3.3 all_reduce</text>
+  <text x="1115" y="1638" class="mono-small">sum scores</text>
+  <text x="1115" y="1662" class="mono-small">across TP ranks</text>
+
+  <rect x="1510" y="1565" width="535" height="120" class="box-amber"/>
+  <text x="1540" y="1605" class="step">3.4 mask + topk + offset</text>
+  <text x="1540" y="1638" class="mono-tiny">topk(2) -> add offset</text>
+  <text x="1540" y="1660" class="mono-tiny">future blocks become -1 in prefill</text>
+
+  <path d="M540 1612 C570 1612, 585 1612, 605 1612" class="arrow-blue"/>
+  <path d="M1015 1612 C1045 1612, 1060 1612, 1080 1612" class="arrow-green"/>
+  <path d="M1440 1612 C1470 1612, 1485 1612, 1505 1612" class="arrow-orange"/>
+
+  <text x="90" y="1448" class="note">Prefill mask: token 0 cannot attend to compressed block 0, because that block summarizes future tokens 0..3.</text>
+</svg>
